@@ -1,0 +1,31 @@
+name: source-validation
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  emulated-transition:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install software emulator and assembler
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends qemu-system-x86 clang
+      - name: Exercise SVM entry, recovery and host-timer cancellation in TCG
+        run: python3 tools/emulate_transition.py --qemu /usr/bin/qemu-system-x86_64
+  tests:
+    runs-on: macos-15-intel
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Fetch locked dependencies
+        run: python3 tools/dependencies.py --fetch
+      - name: Tests, diagnostics and metadata checks
+        run: make check
+      - name: Address and undefined behavior sanitizers
+        run: make sanitize
+      - name: Thread sanitizer
+        run: make thread-sanitize
+      - name: Compile and package diagnostic kext
+        run: make kext hv_smoke_test
+      - name: Verify tests with NDEBUG
+        run: make test BUILD_DIR=build/ndebug TEST_EXTRA_FLAGS=-DNDEBUG

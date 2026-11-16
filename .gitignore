@@ -1,0 +1,10 @@
+/build/
+.DS_Store
+__pycache__/
+*.pyc
+/diagnostics/
+
+/vendor/
+
+# Local conversation history and recovery notes.
+/HANDOFF.md

@@ -1,0 +1,299 @@
+{
+  "schema": 1,
+  "xnu_reference_commit": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+  "scope": "Inspected instruction and field contracts only; hardware acceptance remains false.",
+  "kernel": {
+    "uuid": "28267FD5-3E1E-3686-8A1C-E73E2466FCFB",
+    "sha256": "a91aad0da9d0a2f545c06859524bb048f4e2e392e46aa12da9fabe652081be53",
+    "evidence": [
+      {
+        "symbol": "_kernel_trap",
+        "offset": 37,
+        "bytes": "65448b042558000000833f0e0f84a3070000654c8b242510000000650fb7042520000000668983a2000000",
+        "contract": "Original handler obtains the CPU from GS, then populates saved-state CPU."
+      },
+      {
+        "symbol": "_rdmsr64_carefully",
+        "offset": 0,
+        "bytes": "89f90f32890689560431c0c3b801000000c3",
+        "contract": "Two-argument guarded RDMSR; zero return means success."
+      },
+      {
+        "symbol": "_wrmsr_carefully",
+        "offset": 0,
+        "bytes": "89f989f048c1ee2089f20f3031c0c3b801000000c3",
+        "contract": "Guarded WRMSR accepts uint32 MSR and uint64 value in RSI."
+      },
+      {
+        "symbol": "_cpu_number",
+        "offset": 0,
+        "bytes": "554889e5658b0425",
+        "contract": "Exported CPU accessor uses GS CPU identity."
+      },
+      {
+        "symbol": "_current_thread",
+        "offset": 0,
+        "bytes": "554889e565488b042510",
+        "contract": "Exported current-thread accessor uses GS."
+      },
+      {
+        "symbol": "_ml_nofault_copy",
+        "offset": 0,
+        "bytes": "554889e54157415641554154534883ec1831db4885d20f843c0100004989fc48",
+        "contract": "Wired kernel mapping copier; callers retain source ownership."
+      },
+      {
+        "symbol": "_mp_rendezvous_no_intrs",
+        "offset": 0,
+        "bytes": "554889e54889f14889fe488d3d3febffff488d1528edffff5de972edffff6690",
+        "contract": "Rendezvous callback dispatch with interrupts disabled."
+      },
+      {
+        "symbol": "_vm_map_reference",
+        "offset": 0,
+        "bytes": "554889e54885ff746b4889fe4889f84805e0000000725f488b0d62a3ba004839f177534839c872",
+        "contract": "Retain a caller-owned vm_map; zone/type checks precede reference count increment."
+      },
+      {
+        "symbol": "_vm_map_deallocate",
+        "offset": 0,
+        "bytes": "554889e54885ff74684889fe4889f84805e0000000725c488b0d6286ba004839f177504839c872",
+        "contract": "Release the retained guest vm_map after every successful kernel wire is undone."
+      },
+      {
+        "symbol": "_vm_map_wire_and_extract",
+        "offset": 14,
+        "bytes": "4c89c34189ce4189d74989f44989fde85e3704004d85ed7407410fb74d44eb",
+        "contract": "Arguments: map, address, protection, boolean user_wire, uint32 physical page output. Map page shift at +0x44."
+      },
+      {
+        "symbol": "_vm_map_unwire",
+        "offset": 0,
+        "bytes": "554889e54c8d056577ba005de96fadffff",
+        "contract": "Four-argument kernel/user unwire dispatcher; kernel wires must be paired before source removal."
+      },
+      {
+        "symbol": "_pmap_valid_page",
+        "offset": 0,
+        "bytes": "8b0ddabda10031c085c9742b554889e5488d15c9a9a100eb0f0f",
+        "contract": "uint32 physical page number; rejects pages outside managed physical memory."
+      },
+      {
+        "symbol": "_lck_rw_try_lock_shared",
+        "offset": 0,
+        "bytes": "554889e54889fe65488b0c25100000008b4608a9000001007516a900000c00751d8d5001f00fb15608",
+        "contract": "Pmap shared admission: may spin on interlock; ordinary preemptible thread context only."
+      },
+      {
+        "symbol": "_lck_rw_unlock_shared",
+        "offset": 0,
+        "bytes": "554889e553504889fbe862feffff83f8017507",
+        "contract": "Matching shared unlock, including the shared-mode assertion."
+      },
+      {
+        "symbol": "_preemption_enabled",
+        "offset": 0,
+        "bytes": "554889e531c065833c25580000000074025dc39c58c1e80983e0015dc3",
+        "contract": "Returns true only with zero preemption depth and interrupts enabled."
+      },
+      {
+        "symbol": "_ml_at_interrupt_context",
+        "offset": 0,
+        "bytes": "554889e531c065833c2554000000000f95c05dc3",
+        "contract": "Interrupt-context query reads CPU interrupt depth."
+      },
+      {
+        "symbol": "_hv_ept_pmap_create",
+        "offset": 79,
+        "bytes": "8b48604989c74d893e48890b4883c408",
+        "contract": "Created EPT pmap supplies pm_eptp from +0x60, not pm_cr3 at +0x40."
+      },
+      {
+        "symbol": "__ZN24IOBufferMemoryDescriptor14getBytesNoCopyEv",
+        "offset": 0,
+        "bytes": "f687e0000000407522b8f000000023472083f8207508488b87b8000000c3554889e5488b4760488b005dc331c0c3",
+        "contract": "Nonblocking retained IOBuffer getter: flag tests and pointer reads only; no pmap lookup or lock."
+      },
+      {
+        "symbol": "__ZNK18IOMemoryDescriptor9getLengthEv",
+        "offset": 0,
+        "bytes": "554889e5488b47505dc3",
+        "contract": "Retained descriptor length getter reads +0x50 without allocation, locking or translation."
+      },
+      {
+        "symbol": "_ml_set_interrupts_enabled",
+        "offset": 0,
+        "bytes": "9c58250002000085ff7427554889e5fb9065833c255800000000751165488b0c2500000000f64150047402cdff5dc1e809c34885c074f7fac1e809c3",
+        "contract": "boolean_t setter saves prior IF; zero disables, nonzero enables and may process a pending AST. Restore only after releasing trap resources."
+      },
+      {
+        "symbol": "_thread_get_kernel_stack",
+        "offset": 0,
+        "bytes": "554889e54885ff7409488b87880000005dc331c05dc3",
+        "contract": "Current thread stack accessor returns the pointer at thread +0x88; null input returns zero. Caller holds current-thread lifetime."
+      }
+    ]
+  },
+  "applehv": {
+    "uuid": "3D8ED9BA-2C51-3C31-921B-674CA3C940C1",
+    "sha256": "1489fd9c19af3ad6b35307a3843f08d227811ddcea3cc424875f4ba9c688c184",
+    "evidence": [
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t17init_with_optionsEP11hv_vmx_vm_tjyP26hv_vmx_vcpu_rw_interface_tP26hv_vmx_vcpu_ro_interface_t",
+        "offset": 57,
+        "bytes": "4c897b28836310004c897dd0498b8748020000488b004889433044896b244c8963184c897338488b45c848894340",
+        "contract": "VM 0x28, space 0x30, ID 0x24, RW 0x38, RO 0x40."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t9init_vmcsEv",
+        "offset": 168,
+        "bytes": "48898390000000",
+        "contract": "VMCS physical address is at 0x90, not 0x68."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t9init_vmcsEv",
+        "offset": 344,
+        "bytes": "488b7b30e8e9c3ffff48898548ffffffb8",
+        "contract": "VMCS EPTP comes from the space at 0x30 via get_eptp()."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t11enter_guestEPjS0_",
+        "offset": 295,
+        "bytes": "498dbf85030000bb800c0000498b77384801dee8c18400004189c50f3148c1e2204809c2",
+        "contract": "Entry receives is_launched at 0x385 and RW interface +0xc80."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t11enter_guestEPjS0_",
+        "offset": 210,
+        "bytes": "4c89ffe8c6fcffff",
+        "contract": "Outer method loads guest FP state before the replacement entry point."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t11enter_guestEPjS0_",
+        "offset": 342,
+        "bytes": "4183bf900300000275084c89ffe86eecffff4c89ffe8bcfcffffe800",
+        "contract": "Outer method restores debug-register and FP state after return."
+      },
+      {
+        "symbol": "__ZN14hv_vmx_space_t8get_eptpEv",
+        "offset": 0,
+        "bytes": "554889e50fb6472883e001c1e006480b47184883c81e5dc3",
+        "contract": "XNU stores EPTP/root at 0x18; get_eptp ORs 0x1e and optional AD. Normalize existing flags, do not treat them as PA bits."
+      },
+      {
+        "symbol": "__ZN14hv_vmx_space_t18increment_refcountEv",
+        "offset": 0,
+        "bytes": "554889e5ff47385d",
+        "contract": "Space reference count is at 0x38."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t14msr_can_insertEj",
+        "offset": 0,
+        "bytes": "554889e58b87b0010000ffce8b8fb401000001f101c181f9fd000000771301c603b7c0010000",
+        "contract": "Host and guest MSR list counts are separate partitions."
+      },
+      {
+        "symbol": "_hv_vmx_vcpu_resume_or_launch_guest",
+        "offset": 61,
+        "bytes": "488b86300100000f22d0488b4610488b4e18488b",
+        "contract": "GPR frame CR2 is at 0x130; RAX is at 0x10."
+      },
+      {
+        "symbol": "_vmxexit",
+        "offset": 76,
+        "bytes": "0f20d0488986300100000f011c24488d6424",
+        "contract": "Exit writes guest CR2 to GPR frame +0x130."
+      },
+      {
+        "symbol": "__ZN14hv_vmx_space_t10init_spaceEP11hv_vmx_vm_t",
+        "offset": 83,
+        "bytes": "488d7b204c8d73184c89f6e8000000004c8b7b204d85ff744149833e00743be800000000488943304531f648ba00000000000001004c89ff31f6b9",
+        "contract": "bool init_space(this, vm): creates pmap at +0x20 / EPTP +0x18 and private guest vm_map +0x10."
+      },
+      {
+        "symbol": "__ZN14hv_vmx_space_t3mapEyymy",
+        "offset": 204,
+        "bytes": "4c89e74c89fe4c89f24889d9e8affeffffe948",
+        "contract": "map(this, HVA, GPA, size, flags) calls _protect(this, GPA, size, flags) internally; scopes must nest on one source ticket."
+      },
+      {
+        "symbol": "__ZN14hv_vmx_space_t10map_kernelEyymi",
+        "offset": 0,
+        "bytes": "554889e54883ec104889f0488d75f04889164c8d55fc4589024c8d5df8458903488b7f10488b155f7500",
+        "contract": "map_kernel(this, HVA, GPA, size, int protection): loads private guest vm_map +0x10."
+      },
+      {
+        "symbol": "__ZN14hv_vmx_space_t4freeEv",
+        "offset": 0,
+        "bytes": "554889e553504889fb488b7f104885ff7405e800000000488b05ae7200004889df4883c4085b5dffa0a0000000",
+        "contract": "free releases non-null guest vm_map +0x10 before superclass cleanup; partial init may contain null map."
+      },
+      {
+        "symbol": "__ZN14hv_vmx_space_t9ept_faultEyyb",
+        "offset": 59,
+        "bytes": "31c983e8010f93c183f8028d04490f42c34883c4085b5dc3",
+        "contract": "ept_fault returns 0 for success, 1 for fault/permission failure, 3 for backend errors."
+      },
+      {
+        "symbol": "__ZN14hv_vmx_space_t10invalidateEv",
+        "offset": 48,
+        "bytes": "b901000000660f3880080f9645fc4883c4185dc3",
+        "contract": "invalidate executes single-context INVEPT with the normalized EPTP while the source update is held."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t9init_vmcsEv",
+        "offset": 51,
+        "bytes": "488983880000004885c00f8443030000488b084889c7ff91e00200004885c00f842e0300004989c6",
+        "contract": "VMCS IOBuffer descriptor stored at vCPU +0x88; getter returns its wired kernel VA before prepare."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t9init_vmcsEv",
+        "offset": 101,
+        "bytes": "6a035eff90f001000085c00f85100300004531edb90004000031c04c89f7f3abb9800400000f32418906",
+        "contract": "Prepare direction 3 succeeds before zeroing the 4K VMCS and writing the synthesized revision."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t9init_vmcsEv",
+        "offset": 143,
+        "bytes": "488bbb88000000488b0731f631d2b900080000ff903801000048898390000000",
+        "contract": "getPhysicalSegment(0, nullptr, kIOMemoryMapperNone) result stored at vCPU +0x90 before first VMCLEAR."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t9init_vmcsEv",
+        "offset": 313,
+        "bytes": "488b8390000000488945d0660fc775d0488b8390000000488945d00fc775d0",
+        "contract": "First VMCLEAR/VMPTRLD use the newly stored +0x90 PA while init_vmcs is still active."
+      },
+      {
+        "symbol": "__ZN13hv_vmx_vcpu_t4freeEv",
+        "offset": 0,
+        "bytes": "554889e553504889fbc6470c00e8e25affff488bbb880000004885ff7406488b07ff50284883a38800000000",
+        "contract": "vCPU free releases shadow state, then the descriptor at +0x88; software VMCS must be retired before this call."
+      },
+      {
+        "symbol": "__ZN11hv_vmx_vm_t6deinitEv",
+        "offset": 175,
+        "bytes": "488bbb800200004885ff7406488b07ff502831c04889838002000048898368020000",
+        "contract": "Parent VM releases its RW map before the RW descriptor at +0x280 and kernel pointer +0x268."
+      },
+      {
+        "symbol": "__ZN11hv_vmx_vm_t6deinitEv",
+        "offset": 227,
+        "bytes": "48c7837802000000000000488bbb700200004885ff7406488b07ff502831c04889837002000048898360020000",
+        "contract": "Parent VM releases its RO map before the RO descriptor at +0x270 and kernel pointer +0x260."
+      },
+      {
+        "symbol": "__ZN11hv_vmx_vm_t20alloc_vcpu_interfaceEPP24IOBufferMemoryDescriptorPP11IOMemoryMapPPvmb",
+        "offset": 29,
+        "bytes": "ba00100000bf000001004c89c6e8000000004989064885c07415488b084889c7be03000000ff91f001000085c0740431c0eb4d",
+        "contract": "Interface descriptors allocate page-aligned wired storage and prepare direction 3; kernel buffer is independent of user mapping."
+      },
+      {
+        "symbol": "__ZN11hv_vmx_vm_t11static_initEv",
+        "offset": 56781,
+        "bytes": "b9001000004801c8488905d46b000048890dd56b0000",
+        "contract": "Cold static_init sets the RW interface stride to 0x1000; RO layout depends on the host FP save format."
+      }
+    ]
+  }
+}
