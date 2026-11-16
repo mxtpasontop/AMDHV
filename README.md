@@ -12,6 +12,10 @@
 
 </div>
 
+> **100% AI-made.** AMDHV's original source code, tests, and documentation were
+> generated entirely by AI assistants under human direction. Third-party
+> dependencies retain their own authorship and licenses.
+
 > **Diagnostic only.** AMDHV does not yet provide working Hypervisor.framework
 > virtualization on AMD hardware. Full translation and trap installation are
 > blocked, and the framework entry returns failure. Earlier experimental builds
